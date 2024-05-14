@@ -1,0 +1,96 @@
+class DiscreteMaths:
+    @staticmethod
+    def sum(arr):
+        return sum(arr)
+
+    @staticmethod
+    def square(arr):
+        return [x ** 2 for x in arr]
+
+    @staticmethod
+    def multiply(arr1, arr2):
+        return [x * y for x, y in zip(arr1, arr2)]
+
+
+class Slr:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.n = len(x)
+        self.math = DiscreteMaths()
+
+    def calcularA(self):
+        sumX = self.math.sum(self.x)
+        sumY = self.math.sum(self.y)
+        sumXSquare = self.math.sum(self.math.square(self.x))
+        sumXY = self.math.sum(self.math.multiply(self.x, self.y))
+        return (sumY * sumXSquare - sumX * sumXY) / (self.n * sumXSquare - sumX * sumX)
+
+    def calcularB(self):
+        sumX = self.math.sum(self.x)
+        sumY = self.math.sum(self.y)
+        sumXSquare = self.math.sum(self.math.square(self.x))
+        sumXY = self.math.sum(self.math.multiply(self.x, self.y))
+        return (self.n * sumXY - sumX * sumY) / (self.n * sumXSquare - sumX * sumX)
+
+
+class LinealRegression:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.n = len(x)
+        self.math = DiscreteMaths()
+        self.slr = Slr(x, y)
+
+    def prediction(self, inputNumber):
+        a = self.slr.calcularA()
+        b = self.slr.calcularB()
+        return a + (b * inputNumber)
+
+    def calcularSSR(self):
+        a = self.slr.calcularA()
+        b = self.slr.calcularB()
+        yPredicho = [a + (b * x) for x in self.x]
+        mediaY = self.math.sum(self.y) / self.n
+        return self.math.sum([(yp - mediaY) ** 2 for yp in yPredicho])
+
+    def calcularSST(self):
+        mediaY = self.math.sum(self.y) / self.n
+        return self.math.sum([(y - mediaY) ** 2 for y in self.y])
+
+    def calcularCoeficienteDeterminacion(self):
+        SSR = self.calcularSSR()
+        SST = self.calcularSST()
+        return SSR / SST
+
+    def calcularCoeficienteCorrelacion(self):
+        a = self.slr.calcularA()
+        b = self.slr.calcularB()
+        yPredicho = [a + (b * x) for x in self.x]
+        mediaY = self.math.sum(self.y) / self.n
+        SSR = self.math.sum([(yp - mediaY) ** 2 for yp in yPredicho])
+        SST = self.calcularSST()
+        r = (SSR / SST) ** 0.5
+        return r
+
+
+if __name__ == "__main__":
+    x = [23, 26, 30, 34, 43, 48, 52, 57, 58]
+    y = [651, 762, 856, 1063, 1190, 1298, 1421, 1440, 1518]
+
+    regresion = LinealRegression(x, y)
+
+    a = regresion.slr.calcularA()
+    b = regresion.slr.calcularB()
+
+    print("a:", a)
+    print("b:", b)
+    print("SSR:", regresion.calcularSSR())
+    print("SST:", regresion.calcularSST())
+    print("Coeficiente de determinación (r^2):", regresion.calcularCoeficienteDeterminacion())
+    print("Coeficiente de correlación (r):", regresion.calcularCoeficienteCorrelacion())
+
+    for i in range(5):
+        inputNumber = float(input("Ingrese el número para la predicción: "))
+        prediction = regresion.prediction(inputNumber)
+        print(f"Predicción [{i}]: {inputNumber} --> {prediction}")
